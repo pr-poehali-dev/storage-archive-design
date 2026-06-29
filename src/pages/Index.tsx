@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import type { ReactNode } from 'react';
 import Icon from '@/components/ui/icon';
 
 const HERO_IMG =
@@ -56,9 +57,129 @@ const plan = [
   { id: 'entry', label: 'Вход / Приёмка', icon: 'DoorOpen', area: '50 м²', detail: 'Рампа · буферная зона', x: 64, y: 88, w: 32, h: 8 },
 ];
 
+type LayerId = 'lighting' | 'ventilation' | 'climate' | 'safety';
+
+const layers: { id: LayerId; label: string; icon: string; color: string }[] = [
+  { id: 'lighting',    label: 'Освещение',   icon: 'Lightbulb',   color: '#f97316' },
+  { id: 'ventilation', label: 'Вентиляция',  icon: 'Wind',        color: '#38bdf8' },
+  { id: 'climate',     label: 'Климат',      icon: 'Thermometer', color: '#34d399' },
+  { id: 'safety',      label: 'Безопасность',icon: 'ShieldCheck', color: '#f43f5e' },
+];
+
+const layerElements: Record<LayerId, ReactNode> = {
+  lighting: (
+    <g opacity="0.85">
+      {/* LED-панели: склад труб — 3×5 сетка */}
+      {[14,28,42].map(cx => [16,32,48,64,80].map(cy => (
+        <g key={`l-${cx}-${cy}`}>
+          <rect x={cx-5} y={cy-2} width={10} height={4} rx={1} fill="#f97316" opacity="0.9"/>
+          <ellipse cx={cx} cy={cy} rx={9} ry={9} fill="#f97316" opacity="0.12"/>
+        </g>
+      )))}
+      {/* LED-панели: архив — 2×3 сетка */}
+      {[70,80].map(cx => [12,28,44].map(cy => (
+        <g key={`la-${cx}-${cy}`}>
+          <rect x={cx-4} y={cy-2} width={8} height={3} rx={1} fill="#f97316" opacity="0.9"/>
+          <ellipse cx={cx} cy={cy} rx={7} ry={7} fill="#f97316" opacity="0.12"/>
+        </g>
+      )))}
+      {/* Проезд и приёмка */}
+      {[70,80].map(cx => [72,90].map(cy => (
+        <g key={`lp-${cx}-${cy}`}>
+          <rect x={cx-4} y={cy-2} width={8} height={3} rx={1} fill="#f97316" opacity="0.9"/>
+        </g>
+      )))}
+    </g>
+  ),
+  ventilation: (
+    <g opacity="0.85">
+      {/* Магистральный воздуховод по центру */}
+      <rect x={2} y={48} width={60} height={4} rx={2} fill="#38bdf8" opacity="0.7"/>
+      {/* Ответвления — склад */}
+      {[10,22,34,46,56].map(x => (
+        <g key={`v-${x}`}>
+          <line x1={x} y1={48} x2={x} y2={8}  stroke="#38bdf8" strokeWidth={2} strokeDasharray="3 3"/>
+          <line x1={x} y1={52} x2={x} y2={92} stroke="#38bdf8" strokeWidth={2} strokeDasharray="3 3"/>
+          <circle cx={x} cy={8}  r={3} fill="#38bdf8" opacity="0.8"/>
+          <circle cx={x} cy={92} r={3} fill="#38bdf8" opacity="0.8"/>
+        </g>
+      ))}
+      {/* Воздуховод архив */}
+      <rect x={62} y={30} width={36} height={3} rx={1.5} fill="#38bdf8" opacity="0.7"/>
+      {[66,74,82,90].map(x => (
+        <g key={`va-${x}`}>
+          <line x1={x} y1={30} x2={x} y2={6}  stroke="#38bdf8" strokeWidth={1.5} strokeDasharray="3 3"/>
+          <circle cx={x} cy={6} r={2.5} fill="#38bdf8" opacity="0.8"/>
+        </g>
+      ))}
+      {/* Вытяжки — стрелки */}
+      <text x={4} y={50} fontSize="4" fill="#38bdf8" fontFamily="monospace">▶ ПРИТОК</text>
+      <text x={64} y={29} fontSize="4" fill="#38bdf8" fontFamily="monospace">▶ ПРИТОК</text>
+    </g>
+  ),
+  climate: (
+    <g opacity="0.85">
+      {/* Зона склада: условно холодный контур */}
+      <rect x={4} y={4} width={56} height={92} rx={2} fill="none" stroke="#34d399" strokeWidth={2} strokeDasharray="6 3"/>
+      <text x={8} y={12} fontSize="4.5" fill="#34d399" fontFamily="monospace">+12…16 °C / 60% RH</text>
+      {/* Зона архива: тёплый контур */}
+      <rect x={64} y={4} width={32} height={60} rx={2} fill="none" stroke="#34d399" strokeWidth={2} strokeDasharray="6 3"/>
+      <text x={65} y={11} fontSize="4" fill="#34d399" fontFamily="monospace">+18…22 °C</text>
+      {/* Кондиционеры — склад */}
+      {[10,40].map(x => (
+        <g key={`ac-${x}`}>
+          <rect x={x} y={5} width={12} height={5} rx={1} fill="#34d399" opacity="0.7"/>
+          <text x={x+1} y={9} fontSize="3.5" fill="#000" fontFamily="monospace">AC</text>
+        </g>
+      ))}
+      {/* Кондиционер — архив */}
+      <rect x={66} y={5} width={10} height={5} rx={1} fill="#34d399" opacity="0.7"/>
+      <text x={67} y={9} fontSize="3.5" fill="#000" fontFamily="monospace">AC</text>
+    </g>
+  ),
+  safety: (
+    <g opacity="0.85">
+      {/* Пожарные датчики — склад */}
+      {[10,25,40,55].map(x => [12,30,50,70,88].map(y => (
+        <circle key={`fs-${x}-${y}`} cx={x} cy={y} r={2.5} fill="none" stroke="#f43f5e" strokeWidth={1.5}/>
+      )))}
+      {/* Пожарные датчики — архив */}
+      {[68,80,92].map(x => [12,28,44].map(y => (
+        <circle key={`fa-${x}-${y}`} cx={x} cy={y} r={2} fill="none" stroke="#f43f5e" strokeWidth={1.5}/>
+      )))}
+      {/* Эвакуационные стрелки */}
+      <text x={6}  y={97} fontSize="5" fill="#f43f5e">↓ ВЫХОД</text>
+      <text x={64} y={97} fontSize="5" fill="#f43f5e">↓ ВЫХОД</text>
+      {/* Огнетушители */}
+      {[5,60].map(x => (
+        <g key={`fe-${x}`}>
+          <rect x={x} y={46} width={4} height={7} rx={1} fill="#f43f5e" opacity="0.8"/>
+          <text x={x-1} y={57} fontSize="3.5" fill="#f43f5e" fontFamily="monospace">ОП</text>
+        </g>
+      ))}
+      {/* Периметр безопасности проезда */}
+      <rect x={64} y={68} width={32} height={16} rx={1} fill="none" stroke="#f43f5e" strokeWidth={1.5} strokeDasharray="4 2"/>
+      <text x={65} y={79} fontSize="4" fill="#f43f5e" fontFamily="monospace">ЗОНА ПОГРУЗКИ</text>
+    </g>
+  ),
+};
+
 const Index = () => {
   const [active, setActive] = useState<string | null>('pipe');
+  const [activeLayers, setActiveLayers] = useState<Set<LayerId>>(new Set());
   const activeZone = plan.find((p) => p.id === active);
+
+  const toggleLayer = (id: LayerId) => {
+    setActiveLayers(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground grid-bg">
@@ -129,14 +250,45 @@ const Index = () => {
             Схема планировки
           </h2>
           <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
-            Вид сверху · наведите на зону
+            Вид сверху · слои инженерных систем
           </span>
+        </div>
+
+        {/* Layer toggles */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {layers.map((l) => {
+            const on = activeLayers.has(l.id);
+            return (
+              <button
+                key={l.id}
+                onClick={() => toggleLayer(l.id)}
+                className={`flex items-center gap-2 font-mono text-xs uppercase tracking-wider px-3 py-2 rounded-sm border transition-all duration-200 ${
+                  on
+                    ? 'border-transparent text-background font-semibold'
+                    : 'border-border text-muted-foreground hover:border-foreground/40'
+                }`}
+                style={on ? { backgroundColor: l.color } : {}}
+              >
+                <Icon name={l.icon} size={14} />
+                {l.label}
+              </button>
+            );
+          })}
+          {activeLayers.size > 0 && (
+            <button
+              onClick={() => setActiveLayers(new Set())}
+              className="font-mono text-xs uppercase tracking-wider px-3 py-2 rounded-sm border border-border text-muted-foreground hover:border-destructive hover:text-destructive transition-colors"
+            >
+              Скрыть все
+            </button>
+          )}
         </div>
 
         <div className="grid lg:grid-cols-[1fr_320px] gap-px bg-border border border-border rounded-md overflow-hidden">
           {/* Plan */}
           <div className="metal-plate p-5 sm:p-8">
-            <div className="relative w-full aspect-[4/3] grid-bg border border-border rounded-sm">
+            <div className="relative w-full aspect-[4/3] grid-bg border border-border rounded-sm overflow-hidden">
+              {/* Zone buttons */}
               {plan.map((z) => {
                 const isActive = active === z.id;
                 return (
@@ -171,10 +323,31 @@ const Index = () => {
                   </button>
                 );
               })}
+
+              {/* Engineering layer SVG overlay */}
+              {activeLayers.size > 0 && (
+                <svg
+                  viewBox="0 0 100 100"
+                  preserveAspectRatio="none"
+                  className="absolute inset-0 w-full h-full pointer-events-none z-20"
+                >
+                  {layers.filter(l => activeLayers.has(l.id)).map(l => (
+                    <g key={l.id}>{layerElements[l.id]}</g>
+                  ))}
+                </svg>
+              )}
             </div>
-            <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mt-4 flex items-center gap-2">
-              <span className="w-3 h-3 hazard-stripe rounded-[2px] inline-block" />
-              Масштаб условный · 840 м² общая площадь
+            <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mt-4 flex flex-wrap items-center gap-3">
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-3 hazard-stripe rounded-[2px] inline-block" />
+                840 м² · масштаб условный
+              </span>
+              {layers.filter(l => activeLayers.has(l.id)).map(l => (
+                <span key={l.id} className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: l.color }} />
+                  {l.label}
+                </span>
+              ))}
             </div>
           </div>
 
