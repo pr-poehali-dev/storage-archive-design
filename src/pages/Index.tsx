@@ -17,29 +17,29 @@ const zones = [
     num: '01',
     icon: 'Cylinder',
     title: 'Склад трубной продукции',
-    desc: 'Консольные стеллажи и металлические коники для горизонтального хранения труб разного диаметра и длины.',
-    tags: ['Коники', 'Консольные стеллажи', 'Маркировка ячеек'],
+    desc: 'Левая половина помещения. Консольные стеллажи и металлические коники для горизонтального хранения труб разного диаметра и длины. Проезды для погрузчика.',
+    tags: ['Коники', 'Консольные стеллажи', 'Разметка пола', 'Погрузчик'],
   },
   {
     num: '02',
     icon: 'Library',
     title: 'Двухярусный архив',
-    desc: 'Мезонинная конструкция с двумя уровнями стеллажей для коробов и папок. Лестница и подъёмная зона.',
-    tags: ['2 яруса', 'Архивные стеллажи', 'Мезонин'],
+    desc: 'Правая половина помещения. Мезонинная конструкция с двумя уровнями архивных стеллажей для коробов, папок и документации. Металлическая лестница.',
+    tags: ['2 яруса', 'Архивные стеллажи', 'Мезонин', 'Лестница'],
   },
   {
     num: '03',
-    icon: 'Truck',
-    title: 'Грузовые проезды',
-    desc: 'Размеченные проходы и проезды для погрузчиков с зонированием безопасности и радиусами разворота.',
-    tags: ['Проезды', 'Разметка пола', 'Зоны безопасности'],
+    icon: 'Monitor',
+    title: 'Рабочие места персонала',
+    desc: 'Зона в правой части: рабочие столы для архивариусов, шкафы для текущей документации, зона отдыха и сантехнический узел.',
+    tags: ['Рабочие столы', 'Шкафы', 'Зона отдыха'],
   },
   {
     num: '04',
     icon: 'DoorOpen',
     title: 'Входная зона и приёмка',
-    desc: 'Зона приёма-отправки товара с буферной площадкой, рампой и местом для оформления документов.',
-    tags: ['Рампа', 'Буфер', 'Приёмка'],
+    desc: 'Вход и зона приёма-выдачи документов расположены в правой части. Буферная площадка, рампа и место для оформления заявок.',
+    tags: ['Рампа', 'Буфер', 'Приёмка документов'],
   },
 ];
 
@@ -51,10 +51,11 @@ const systems = [
 ];
 
 const plan = [
-  { id: 'pipe', label: 'Склад труб', icon: 'Cylinder', area: '420 м²', detail: 'Консольные стеллажи + коники', x: 4, y: 4, w: 56, h: 92 },
-  { id: 'archive', label: 'Двухярусный архив', icon: 'Library', area: '280 м²', detail: 'Мезонин · 2 уровня стеллажей', x: 64, y: 4, w: 32, h: 60 },
-  { id: 'lane', label: 'Грузовой проезд', icon: 'Truck', area: '90 м²', detail: 'Разметка · радиус разворота', x: 64, y: 68, w: 32, h: 16 },
-  { id: 'entry', label: 'Вход / Приёмка', icon: 'DoorOpen', area: '50 м²', detail: 'Рампа · буферная зона', x: 64, y: 88, w: 32, h: 8 },
+  { id: 'pipe',    label: 'Склад труб',       icon: 'Cylinder',  area: '420 м²', detail: 'Консольные стеллажи + коники для трубной продукции', x: 2,  y: 2,  w: 46, h: 96 },
+  { id: 'aisle',   label: 'Грузовой проход',  icon: 'Truck',     area: '—',      detail: 'Центральный проезд вдоль перегородки',                x: 48, y: 2,  w: 4,  h: 96 },
+  { id: 'archive', label: 'Двухярусный архив',icon: 'Library',   area: '280 м²', detail: 'Мезонин · 2 уровня стеллажей для документации',       x: 52, y: 2,  w: 46, h: 62 },
+  { id: 'staff',   label: 'Рабочие места',    icon: 'Monitor',   area: '80 м²',  detail: 'Зона персонала: столы, шкафы, зона отдыха',           x: 52, y: 64, w: 46, h: 20 },
+  { id: 'entry',   label: 'Вход / Приёмка',   icon: 'DoorOpen',  area: '60 м²',  detail: 'Входная зона, рампа и буфер приёма-выдачи',           x: 52, y: 84, w: 46, h: 14 },
 ];
 
 type LayerId = 'lighting' | 'ventilation' | 'climate' | 'safety';
@@ -68,98 +69,117 @@ const layers: { id: LayerId; label: string; icon: string; color: string }[] = [
 
 const layerElements: Record<LayerId, ReactNode> = {
   lighting: (
-    <g opacity="0.85">
-      {/* LED-панели: склад труб — 3×5 сетка */}
-      {[14,28,42].map(cx => [16,32,48,64,80].map(cy => (
-        <g key={`l-${cx}-${cy}`}>
-          <rect x={cx-5} y={cy-2} width={10} height={4} rx={1} fill="#f97316" opacity="0.9"/>
-          <ellipse cx={cx} cy={cy} rx={9} ry={9} fill="#f97316" opacity="0.12"/>
+    <g opacity="0.9">
+      {/* Перегородка */}
+      <line x1={50} y1={2} x2={50} y2={98} stroke="#555" strokeWidth={1} strokeDasharray="2 2"/>
+      {/* LED-панели: склад — 3×5 сетка */}
+      {[12,25,38].map(cx => [14,28,44,60,76,90].map(cy => (
+        <g key={`ls-${cx}-${cy}`}>
+          <rect x={cx-5} y={cy-2} width={10} height={3.5} rx={1} fill="#f97316" opacity="0.95"/>
+          <ellipse cx={cx} cy={cy} rx={10} ry={10} fill="#f97316" opacity="0.1"/>
         </g>
       )))}
-      {/* LED-панели: архив — 2×3 сетка */}
-      {[70,80].map(cx => [12,28,44].map(cy => (
+      {/* LED-панели: архив — 2 яруса, 3×4 */}
+      {[62,75,88].map(cx => [10,24,38,52].map(cy => (
         <g key={`la-${cx}-${cy}`}>
-          <rect x={cx-4} y={cy-2} width={8} height={3} rx={1} fill="#f97316" opacity="0.9"/>
-          <ellipse cx={cx} cy={cy} rx={7} ry={7} fill="#f97316" opacity="0.12"/>
+          <rect x={cx-4} y={cy-2} width={8} height={3} rx={1} fill="#f97316" opacity="0.95"/>
+          <ellipse cx={cx} cy={cy} rx={8} ry={8} fill="#f97316" opacity="0.1"/>
         </g>
       )))}
-      {/* Проезд и приёмка */}
-      {[70,80].map(cx => [72,90].map(cy => (
-        <g key={`lp-${cx}-${cy}`}>
-          <rect x={cx-4} y={cy-2} width={8} height={3} rx={1} fill="#f97316" opacity="0.9"/>
+      {/* LED — рабочие места и вход */}
+      {[62,75,88].map(cx => [70,82,92].map(cy => (
+        <g key={`lw-${cx}-${cy}`}>
+          <rect x={cx-4} y={cy-2} width={8} height={3} rx={1} fill="#f97316" opacity="0.8"/>
         </g>
       )))}
     </g>
   ),
   ventilation: (
     <g opacity="0.85">
-      {/* Магистральный воздуховод по центру */}
-      <rect x={2} y={48} width={60} height={4} rx={2} fill="#38bdf8" opacity="0.7"/>
-      {/* Ответвления — склад */}
-      {[10,22,34,46,56].map(x => (
-        <g key={`v-${x}`}>
-          <line x1={x} y1={48} x2={x} y2={8}  stroke="#38bdf8" strokeWidth={2} strokeDasharray="3 3"/>
-          <line x1={x} y1={52} x2={x} y2={92} stroke="#38bdf8" strokeWidth={2} strokeDasharray="3 3"/>
-          <circle cx={x} cy={8}  r={3} fill="#38bdf8" opacity="0.8"/>
-          <circle cx={x} cy={92} r={3} fill="#38bdf8" opacity="0.8"/>
+      {/* Магистраль — склад, вдоль стены */}
+      <rect x={3} y={49} width={45} height={3.5} rx={1.5} fill="#38bdf8" opacity="0.75"/>
+      <text x={4} y={48} fontSize="3.5" fill="#38bdf8" fontFamily="monospace">▶ ПРИТОК</text>
+      {[9,18,27,36,45].map(x => (
+        <g key={`vs-${x}`}>
+          <line x1={x} y1={49} x2={x} y2={5}  stroke="#38bdf8" strokeWidth={1.5} strokeDasharray="3 3"/>
+          <line x1={x} y1={52} x2={x} y2={97} stroke="#38bdf8" strokeWidth={1.5} strokeDasharray="3 3"/>
+          <circle cx={x} cy={5}  r={2.5} fill="#38bdf8" opacity="0.85"/>
+          <circle cx={x} cy={97} r={2.5} fill="#38bdf8" opacity="0.85"/>
         </g>
       ))}
-      {/* Воздуховод архив */}
-      <rect x={62} y={30} width={36} height={3} rx={1.5} fill="#38bdf8" opacity="0.7"/>
-      {[66,74,82,90].map(x => (
+      {/* Магистраль — архив */}
+      <rect x={52} y={33} width={46} height={3} rx={1.5} fill="#38bdf8" opacity="0.75"/>
+      <text x={53} y={32} fontSize="3.5" fill="#38bdf8" fontFamily="monospace">▶ ПРИТОК</text>
+      {[58,68,78,88,96].map(x => (
         <g key={`va-${x}`}>
-          <line x1={x} y1={30} x2={x} y2={6}  stroke="#38bdf8" strokeWidth={1.5} strokeDasharray="3 3"/>
-          <circle cx={x} cy={6} r={2.5} fill="#38bdf8" opacity="0.8"/>
+          <line x1={x} y1={33} x2={x} y2={5}  stroke="#38bdf8" strokeWidth={1.5} strokeDasharray="3 3"/>
+          <circle cx={x} cy={5} r={2.5} fill="#38bdf8" opacity="0.85"/>
         </g>
       ))}
-      {/* Вытяжки — стрелки */}
-      <text x={4} y={50} fontSize="4" fill="#38bdf8" fontFamily="monospace">▶ ПРИТОК</text>
-      <text x={64} y={29} fontSize="4" fill="#38bdf8" fontFamily="monospace">▶ ПРИТОК</text>
+      {/* Вытяжка архив нижняя */}
+      <rect x={52} y={78} width={46} height={2.5} rx={1} fill="#38bdf8" opacity="0.5"/>
+      {[60,74,88].map(x => (
+        <g key={`vw-${x}`}>
+          <line x1={x} y1={78} x2={x} y2={98} stroke="#38bdf8" strokeWidth={1} strokeDasharray="2 3"/>
+          <circle cx={x} cy={98} r={2} fill="#38bdf8" opacity="0.7"/>
+        </g>
+      ))}
     </g>
   ),
   climate: (
-    <g opacity="0.85">
-      {/* Зона склада: условно холодный контур */}
-      <rect x={4} y={4} width={56} height={92} rx={2} fill="none" stroke="#34d399" strokeWidth={2} strokeDasharray="6 3"/>
-      <text x={8} y={12} fontSize="4.5" fill="#34d399" fontFamily="monospace">+12…16 °C / 60% RH</text>
-      {/* Зона архива: тёплый контур */}
-      <rect x={64} y={4} width={32} height={60} rx={2} fill="none" stroke="#34d399" strokeWidth={2} strokeDasharray="6 3"/>
-      <text x={65} y={11} fontSize="4" fill="#34d399" fontFamily="monospace">+18…22 °C</text>
-      {/* Кондиционеры — склад */}
-      {[10,40].map(x => (
-        <g key={`ac-${x}`}>
-          <rect x={x} y={5} width={12} height={5} rx={1} fill="#34d399" opacity="0.7"/>
-          <text x={x+1} y={9} fontSize="3.5" fill="#000" fontFamily="monospace">AC</text>
+    <g opacity="0.9">
+      {/* Склад — промышленный режим */}
+      <rect x={2} y={2} width={47} height={96} rx={2} fill="#34d399" opacity="0.07" stroke="#34d399" strokeWidth={2} strokeDasharray="6 3"/>
+      <text x={5} y={11} fontSize="4" fill="#34d399" fontFamily="monospace">+8…16 °C</text>
+      <text x={5} y={17} fontSize="3.5" fill="#34d399" fontFamily="monospace">влажность 50–70%</text>
+      {/* Кондиционеры склад */}
+      {[8,30].map(x => (
+        <g key={`acs-${x}`}>
+          <rect x={x} y={3} width={13} height={5} rx={1} fill="#34d399" opacity="0.75"/>
+          <text x={x+1.5} y={7} fontSize="3.5" fill="#0a1a12" fontFamily="monospace">AC</text>
         </g>
       ))}
-      {/* Кондиционер — архив */}
-      <rect x={66} y={5} width={10} height={5} rx={1} fill="#34d399" opacity="0.7"/>
-      <text x={67} y={9} fontSize="3.5" fill="#000" fontFamily="monospace">AC</text>
+      {/* Архив — комфортный режим */}
+      <rect x={52} y={2} width={46} height={62} rx={2} fill="#34d399" opacity="0.07" stroke="#34d399" strokeWidth={2} strokeDasharray="6 3"/>
+      <text x={55} y={11} fontSize="4" fill="#34d399" fontFamily="monospace">+18…22 °C</text>
+      <text x={55} y={17} fontSize="3.5" fill="#34d399" fontFamily="monospace">влажность 45–55%</text>
+      {[57,78].map(x => (
+        <g key={`aca-${x}`}>
+          <rect x={x} y={3} width={13} height={5} rx={1} fill="#34d399" opacity="0.75"/>
+          <text x={x+1.5} y={7} fontSize="3.5" fill="#0a1a12" fontFamily="monospace">AC</text>
+        </g>
+      ))}
+      {/* Рабочие места */}
+      <rect x={52} y={64} width={46} height={34} rx={2} fill="#34d399" opacity="0.04" stroke="#34d399" strokeWidth={1.5} strokeDasharray="4 4"/>
+      <text x={55} y={76} fontSize="3.5" fill="#34d399" fontFamily="monospace">+20…24 °C</text>
     </g>
   ),
   safety: (
-    <g opacity="0.85">
+    <g opacity="0.88">
       {/* Пожарные датчики — склад */}
-      {[10,25,40,55].map(x => [12,30,50,70,88].map(y => (
+      {[10,23,36].map(x => [10,27,47,67,87].map(y => (
         <circle key={`fs-${x}-${y}`} cx={x} cy={y} r={2.5} fill="none" stroke="#f43f5e" strokeWidth={1.5}/>
       )))}
-      {/* Пожарные датчики — архив */}
-      {[68,80,92].map(x => [12,28,44].map(y => (
+      {/* Пожарные датчики — архив и офис */}
+      {[60,74,88].map(x => [10,26,42,72,86,95].map(y => (
         <circle key={`fa-${x}-${y}`} cx={x} cy={y} r={2} fill="none" stroke="#f43f5e" strokeWidth={1.5}/>
       )))}
-      {/* Эвакуационные стрелки */}
-      <text x={6}  y={97} fontSize="5" fill="#f43f5e">↓ ВЫХОД</text>
-      <text x={64} y={97} fontSize="5" fill="#f43f5e">↓ ВЫХОД</text>
       {/* Огнетушители */}
-      {[5,60].map(x => (
-        <g key={`fe-${x}`}>
-          <rect x={x} y={46} width={4} height={7} rx={1} fill="#f43f5e" opacity="0.8"/>
-          <text x={x-1} y={57} fontSize="3.5" fill="#f43f5e" fontFamily="monospace">ОП</text>
+      {[3,46,52,97].map(x => [30,70].map(y => (
+        <g key={`fe-${x}-${y}`}>
+          <rect x={x-2} y={y-4} width={4} height={7} rx={1} fill="#f43f5e" opacity="0.85"/>
+          <text x={x-3} y={y+6} fontSize="3" fill="#f43f5e" fontFamily="monospace">ОП</text>
         </g>
-      ))}
-      {/* Периметр безопасности проезда */}
-      <rect x={64} y={68} width={32} height={16} rx={1} fill="none" stroke="#f43f5e" strokeWidth={1.5} strokeDasharray="4 2"/>
-      <text x={65} y={79} fontSize="4" fill="#f43f5e" fontFamily="monospace">ЗОНА ПОГРУЗКИ</text>
+      )))}
+      {/* Эвакуационные выходы */}
+      <text x={4}  y={99} fontSize="4.5" fill="#f43f5e">↓ ВЫХОД</text>
+      <text x={54} y={99} fontSize="4.5" fill="#f43f5e">↓ ВЫХОД</text>
+      {/* Зона погрузки — штриховка */}
+      <rect x={52} y={84} width={46} height={14} rx={1} fill="none" stroke="#f43f5e" strokeWidth={1.5} strokeDasharray="4 2"/>
+      <text x={55} y={93} fontSize="3.5" fill="#f43f5e" fontFamily="monospace">ЗОНА ПРИЁМКИ</text>
+      {/* Перегородка — противопожарная отметка */}
+      <rect x={49} y={2} width={2} height={96} fill="#f43f5e" opacity="0.2"/>
+      <text x={49.5} y={50} fontSize="3" fill="#f43f5e" fontFamily="monospace" transform="rotate(-90,49.5,50)">ПП ПЕРЕГОРОДКА</text>
     </g>
   ),
 };
@@ -323,6 +343,24 @@ const Index = () => {
                   </button>
                 );
               })}
+
+              {/* Permanent base SVG: partition wall + labels */}
+              <svg
+                viewBox="0 0 100 100"
+                preserveAspectRatio="none"
+                className="absolute inset-0 w-full h-full pointer-events-none z-10"
+              >
+                {/* Капитальная перегородка по центру */}
+                <rect x={49} y={0} width={2} height={100} fill="hsl(30,6%,30%)" />
+                <rect x={49.3} y={0} width={1.4} height={100} fill="hsl(30,6%,50%)" opacity="0.4"/>
+                {/* Проём-дверь в перегородке */}
+                <rect x={49} y={42} width={2} height={16} fill="hsl(30,8%,11%)"/>
+                <line x1={49} y1={42} x2={51} y2={50} stroke="#f97316" strokeWidth={0.7} opacity="0.8"/>
+                <line x1={49} y1={58} x2={51} y2={50} stroke="#f97316" strokeWidth={0.7} opacity="0.8"/>
+                {/* Надписи половин */}
+                <text x={24} y={6} fontSize="3.2" fill="hsl(40,15%,50%)" fontFamily="monospace" textAnchor="middle" letterSpacing="1">СКЛАД · ТРУБНАЯ ПРОДУКЦИЯ</text>
+                <text x={75} y={6} fontSize="3.2" fill="hsl(40,15%,50%)" fontFamily="monospace" textAnchor="middle" letterSpacing="1">АРХИВ · РАБОЧАЯ ЗОНА</text>
+              </svg>
 
               {/* Engineering layer SVG overlay */}
               {activeLayers.size > 0 && (
