@@ -38,8 +38,8 @@ const zones = [
     num: '04',
     icon: 'DoorOpen',
     title: 'Входная зона и приёмка',
-    desc: 'Вход и зона приёма-выдачи документов расположены в правой части. Буферная площадка, рампа и место для оформления заявок.',
-    tags: ['Рампа', 'Буфер', 'Приёмка документов'],
+    desc: 'Расположена в нижней части складской половины. Въезд для транспорта, рампа для разгрузки труб, буферная площадка и пункт оформления документов.',
+    tags: ['Рампа', 'Въезд транспорта', 'Буфер', 'Приёмка товара'],
   },
 ];
 
@@ -51,11 +51,10 @@ const systems = [
 ];
 
 const plan = [
-  { id: 'pipe',    label: 'Склад труб',       icon: 'Cylinder',  area: '420 м²', detail: 'Консольные стеллажи + коники для трубной продукции', x: 2,  y: 2,  w: 46, h: 96 },
-  { id: 'aisle',   label: 'Грузовой проход',  icon: 'Truck',     area: '—',      detail: 'Центральный проезд вдоль перегородки',                x: 48, y: 2,  w: 4,  h: 96 },
-  { id: 'archive', label: 'Двухярусный архив',icon: 'Library',   area: '280 м²', detail: 'Мезонин · 2 уровня стеллажей для документации',       x: 52, y: 2,  w: 46, h: 62 },
-  { id: 'staff',   label: 'Рабочие места',    icon: 'Monitor',   area: '80 м²',  detail: 'Зона персонала: столы, шкафы, зона отдыха',           x: 52, y: 64, w: 46, h: 20 },
-  { id: 'entry',   label: 'Вход / Приёмка',   icon: 'DoorOpen',  area: '60 м²',  detail: 'Входная зона, рампа и буфер приёма-выдачи',           x: 52, y: 84, w: 46, h: 14 },
+  { id: 'pipe',    label: 'Склад труб',        icon: 'Cylinder',  area: '360 м²', detail: 'Консольные стеллажи + коники для трубной продукции', x: 2,  y: 2,  w: 46, h: 76 },
+  { id: 'entry',   label: 'Вход / Приёмка',    icon: 'DoorOpen',  area: '60 м²',  detail: 'Входная зона, рампа и буфер приёма-выдачи товара',   x: 2,  y: 78, w: 46, h: 20 },
+  { id: 'archive', label: 'Двухярусный архив', icon: 'Library',   area: '280 м²', detail: 'Мезонин · 2 уровня стеллажей для документации',      x: 52, y: 2,  w: 46, h: 62 },
+  { id: 'staff',   label: 'Рабочие места',     icon: 'Monitor',   area: '80 м²',  detail: 'Зона персонала: столы, шкафы, зона отдыха',          x: 52, y: 64, w: 46, h: 34 },
 ];
 
 type LayerId = 'lighting' | 'ventilation' | 'climate' | 'safety';
@@ -174,9 +173,9 @@ const layerElements: Record<LayerId, ReactNode> = {
       {/* Эвакуационные выходы */}
       <text x={4}  y={99} fontSize="4.5" fill="#f43f5e">↓ ВЫХОД</text>
       <text x={54} y={99} fontSize="4.5" fill="#f43f5e">↓ ВЫХОД</text>
-      {/* Зона погрузки — штриховка */}
-      <rect x={52} y={84} width={46} height={14} rx={1} fill="none" stroke="#f43f5e" strokeWidth={1.5} strokeDasharray="4 2"/>
-      <text x={55} y={93} fontSize="3.5" fill="#f43f5e" fontFamily="monospace">ЗОНА ПРИЁМКИ</text>
+      {/* Зона приёмки — слева снизу */}
+      <rect x={2} y={78} width={46} height={20} rx={1} fill="none" stroke="#f43f5e" strokeWidth={1.5} strokeDasharray="4 2"/>
+      <text x={5} y={91} fontSize="3.5" fill="#f43f5e" fontFamily="monospace">ЗОНА ПРИЁМКИ</text>
       {/* Перегородка — противопожарная отметка */}
       <rect x={49} y={2} width={2} height={96} fill="#f43f5e" opacity="0.2"/>
       <text x={49.5} y={50} fontSize="3" fill="#f43f5e" fontFamily="monospace" transform="rotate(-90,49.5,50)">ПП ПЕРЕГОРОДКА</text>
@@ -358,8 +357,10 @@ const Index = () => {
                 <line x1={49} y1={42} x2={51} y2={50} stroke="#f97316" strokeWidth={0.7} opacity="0.8"/>
                 <line x1={49} y1={58} x2={51} y2={50} stroke="#f97316" strokeWidth={0.7} opacity="0.8"/>
                 {/* Надписи половин */}
-                <text x={24} y={6} fontSize="3.2" fill="hsl(40,15%,50%)" fontFamily="monospace" textAnchor="middle" letterSpacing="1">СКЛАД · ТРУБНАЯ ПРОДУКЦИЯ</text>
+                <text x={24} y={6} fontSize="3.2" fill="hsl(40,15%,50%)" fontFamily="monospace" textAnchor="middle" letterSpacing="1">СКЛАД + ПРИЁМКА</text>
                 <text x={75} y={6} fontSize="3.2" fill="hsl(40,15%,50%)" fontFamily="monospace" textAnchor="middle" letterSpacing="1">АРХИВ · РАБОЧАЯ ЗОНА</text>
+                {/* Линия разделения приёмки внутри левой части */}
+                <line x1={2} y1={78} x2={48} y2={78} stroke="hsl(30,6%,35%)" strokeWidth={1} strokeDasharray="4 3"/>
               </svg>
 
               {/* Engineering layer SVG overlay */}
